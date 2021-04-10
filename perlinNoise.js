@@ -46,9 +46,9 @@ class PerlinNoise {
 		let tr = this.dotProdGrid(x, y, xf+1, yf);
 		let bl = this.dotProdGrid(x, y, xf,   yf+1);
 		let br = this.dotProdGrid(x, y, xf+1, yf+1);
-		let xt = this.interp(x-xf, tl, tr);
-		let xb = this.interp(x-xf, bl, br);
-		let v = this.interp(y-yf, xt, xb);
+		let xt = this.interpolate(x-xf, tl, tr);
+		let xb = this.interpolate(x-xf, bl, br);
+		let v = this.interpolate(y-yf, xt, xb);
 		return v;
 	}
 
