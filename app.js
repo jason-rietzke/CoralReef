@@ -58,6 +58,39 @@ var rotationOffsetVector = {
 	y: rotationNoise.get(Math.random(), Math.random()) / 2
 }
 
+// red color noise => color map for red fill of rectangles
+const rColorNoise = new PerlinNoise();
+var rColorNoiseOffset = {
+	x: 0,
+	y: 0
+}
+var rColorOffsetVector = {
+	x: rColorNoise.get(Math.random(), Math.random()) / 4,
+	y: rColorNoise.get(Math.random(), Math.random()) / 4
+}
+
+// green color noise => color map for green fill of rectangles
+const gColorNoise = new PerlinNoise();
+var gColorNoiseOffset = {
+	x: 0,
+	y: 0
+}
+var gColorOffsetVector = {
+	x: gColorNoise.get(Math.random(), Math.random()) / 4,
+	y: gColorNoise.get(Math.random(), Math.random()) / 4
+}
+
+// blue color noise => color map for blue fill of rectangles
+const bColorNoise = new PerlinNoise();
+var bColorNoiseOffset = {
+	x: 0,
+	y: 0
+}
+var bColorOffsetVector = {
+	x: bColorNoise.get(Math.random(), Math.random()) / 4,
+	y: bColorNoise.get(Math.random(), Math.random()) / 4
+}
+
 
 // draw canvas content
 function draw() {
@@ -79,14 +112,33 @@ function draw() {
 			const xRotMapPos = (x + rotationNoiseOffset.x) / zoomScale;
 			const yRotMapPos = (y + rotationNoiseOffset.y) / zoomScale;
 			const rotation = rotationNoise.get(xRotMapPos, yRotMapPos) * (720 / Math.PI);
+
+			// rColor values
+			const xRColMapPos = (x + rColorNoiseOffset.x) / (zoomScale / 2);
+			const yRColMapPos = (y + rColorNoiseOffset.y) / (zoomScale / 2);
+			const rColor = clamp((256 * rColorNoise.get(xRColMapPos, yRColMapPos)), 0, 256);
+			// gColor values
+			const xGColMapPos = (x + gColorNoiseOffset.x) / (zoomScale / 2);
+			const yGColMapPos = (y + gColorNoiseOffset.y) / (zoomScale / 2);
+			const gColor = clamp((256 * gColorNoise.get(xGColMapPos, yGColMapPos)), 0, 256);
+			// bColor values
+			const xBColMapPos = (x + bColorNoiseOffset.x) / (zoomScale / 2);
+			const yBColMapPos = (y + bColorNoiseOffset.y) / (zoomScale / 2);
+			const bColor = clamp((256 * bColorNoise.get(xBColMapPos, yBColMapPos)), 0, 256);
+
 			roundRect(ctx, x * (width + gapSize), y * (width + gapSize), width, height, width / 2, rotation,
-						true, '#32323288', 
-						true, '#22aaff', 1);
+						true, `rgba(${rColor}, ${gColor} ,${bColor} , 0.5)`, 
+						false, '#22aaff', 1);
 		}
 	}
 
 	lengthNoiseOffset = moveNoise(lengthNoiseOffset, lengthOffsetVector);
 	rotationNoiseOffset = moveNoise(rotationNoiseOffset, rotationOffsetVector);
+
+	rColorNoiseOffset = moveNoise(rColorNoiseOffset, rColorOffsetVector);
+	gColorNoiseOffset = moveNoise(gColorNoiseOffset, gColorOffsetVector);
+	bColorNoiseOffset = moveNoise(bColorNoiseOffset, bColorOffsetVector);
+
 	window.requestAnimationFrame(draw);
 }
 
