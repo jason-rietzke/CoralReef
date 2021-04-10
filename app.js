@@ -33,7 +33,7 @@ function clamp(number, min, max) {
 const zoomScale = 10;
 const maxLength = 200;
 const width = 15;
-const gapSize = 30;
+const gapSize = 20;
 
 
 // length noise => length map for rectangles
@@ -43,8 +43,8 @@ var lengthNoiseOffset = {
 	y: 0
 }
 var lengthOffsetVector = {
-	x: lengthNoise.get(Math.random(), Math.random()),
-	y: lengthNoise.get(Math.random(), Math.random())
+	x: lengthNoise.get(Math.random(), Math.random()) / 4,
+	y: lengthNoise.get(Math.random(), Math.random()) / 4
 }
 
 // rotation noise => rotation map for rectangles
@@ -54,8 +54,8 @@ var rotationNoiseOffset = {
 	y: 0
 }
 var rotationOffsetVector = {
-	x: lengthNoise.get(Math.random(), Math.random()),
-	y: lengthNoise.get(Math.random(), Math.random())
+	x: rotationNoise.get(Math.random(), Math.random()) / 2,
+	y: rotationNoise.get(Math.random(), Math.random()) / 2
 }
 
 
@@ -70,16 +70,23 @@ function draw() {
 	// loop through the positions in the 2D canvas
 	for (var x = 0; x < canvas.clientWidth / (width + gapSize); x++) {
 		for (var y = 0; y < canvas.clientHeight / (width + gapSize); y++) {
-			const xMapPos = (x + lengthNoiseOffset.x) / zoomScale;
-			const yMapPos = (y + lengthNoiseOffset.y) / zoomScale;
-			const height = maxLength * clamp((lengthNoise.get(xMapPos, yMapPos)), 0, maxLength);
-			roundRect(ctx, x * (width + gapSize), y * (width + gapSize), width, height, width / 2, 
+			// length values
+			const xLenMapPos = (x + lengthNoiseOffset.x) / zoomScale;
+			const yLenMapPos = (y + lengthNoiseOffset.y) / zoomScale;
+			const height = maxLength * clamp((lengthNoise.get(xLenMapPos, yLenMapPos)), 0, maxLength);
+
+			// rotation values
+			const xRotMapPos = (x + rotationNoiseOffset.x) / zoomScale;
+			const yRotMapPos = (y + rotationNoiseOffset.y) / zoomScale;
+			const rotation = rotationNoise.get(xRotMapPos, yRotMapPos) * (720 / Math.PI);
+			roundRect(ctx, x * (width + gapSize), y * (width + gapSize), width, height, width / 2, rotation,
 						true, '#32323288', 
 						true, '#22aaff', 1);
 		}
 	}
 
 	lengthNoiseOffset = moveNoise(lengthNoiseOffset, lengthOffsetVector);
+	rotationNoiseOffset = moveNoise(rotationNoiseOffset, rotationOffsetVector);
 	window.requestAnimationFrame(draw);
 }
 
@@ -98,26 +105,30 @@ function draw() {
  * @param {String} strokeColor 
  * @param {Number} strokeWidth 
  */
-function roundRect(ctx, x, y, width, height, radius = 0, 
+function roundRect(ctx, x, y, width, height, radius = 0, rotation = 0,
 					fill = true, fillColor = '#dededf', 
 					stroke = true, strokeColor = '#ffffff', strokeWidth = 2) {
 	if (height < radius * 2 || width < radius * 2) {return; }
+	ctx.save();
 	ctx.beginPath();
+	ctx.translate(x + width/2, y + height/2);
+	ctx.rotate(rotation * Math.PI / 180);
 	ctx.strokeStyle = strokeColor;
 	ctx.lineWidth = strokeWidth;
-	ctx.moveTo(x + radius, y);
-	ctx.lineTo(x + width - radius, y);
-	ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
-	ctx.lineTo(x + width, y + height - radius);
-	ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-	ctx.lineTo(x + radius, y + height);
-	ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
-	ctx.lineTo(x, y + radius);
-	ctx.quadraticCurveTo(x, y, x + radius, y);
+	ctx.moveTo(radius, 0);
+	ctx.lineTo(width - radius, 0);
+	ctx.quadraticCurveTo(width, 0, width, radius);
+	ctx.lineTo(width, height - radius);
+	ctx.quadraticCurveTo(width, height, width - radius, height);
+	ctx.lineTo(radius, height);
+	ctx.quadraticCurveTo(0, height, 0, height - radius);
+	ctx.lineTo(0, radius);
+	ctx.quadraticCurveTo(0, 0, radius, 0);
 	ctx.closePath();
 	if (fill) { 
 		ctx.fillStyle = fillColor;
 		ctx.fill(); 
 	}
 	if (stroke) { ctx.stroke(); }
+	ctx.restore();
 }
