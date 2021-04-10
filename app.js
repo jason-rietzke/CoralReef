@@ -1,5 +1,6 @@
-window.onload = init;
+'use strict'
 
+window.onload = init;
 window.onresize = resizeCanvas;
 
 function init() {
@@ -14,6 +15,14 @@ function resizeCanvas() {
 	canvas.style.backgroundColor = '#000000';
 }
 
+const noiseOffset = {
+	x: 0,
+	y: 0
+}
+var offsetVector = {
+	x: PerlinNoise.get(Math.random(), Math.random()),
+	y: PerlinNoise.get(Math.random(), Math.random())
+}
 
 function draw() {
 	const canvas = document.getElementById('canvas');
@@ -27,13 +36,26 @@ function draw() {
 	// loop through the positions in the 2D canvas
 	for (var x = 0; x < canvas.clientWidth / (width*1.5); x++) {
 		for (var y = 0; y < canvas.clientHeight / (width*1.5); y++) {
-			roundRect(ctx, x * (width * 1.5), y * (width * 1.5), width, width * 4, width / 2, true, '#323232', true, '#22aaff', 2);
-		}	
+			const height = width * clamp((10 * PerlinNoise.get((x + noiseOffset.x) / 50, (y + noiseOffset.y) / 50)), 0, 10);
+			roundRect(ctx, x * (width * 1.5), y * (width * 1.5), width, height, width / 2, true, '#323232', true, '#22aaff', 1);
+		}
 	}
-	// console.log((x * y) + ' strokes');
+
+	moveNoise();
 	window.requestAnimationFrame(draw);
 }
 
+
+function moveNoise() {
+	noiseOffset.x += offsetVector.x;
+	noiseOffset.y += offsetVector.y;
+	if (noiseOffset.x > 100 || noiseOffset.x < -100) {
+		offsetVector.x = - offsetVector.x + (Math.random() / 10);
+	}
+	if (noiseOffset.y > 100 || noiseOffset.y < -100) {
+		offsetVector.y = - offsetVector.y + (Math.random() / 10);
+	}
+}
 
 
 // draws a rounded rectangle into the canvas-context
@@ -51,10 +73,10 @@ function draw() {
  * @param {Number} strokeWidth 
  */
 function roundRect(ctx, x, y, width, height, radius = 0, fill = true, fillColor = '#dededf', stroke = true, strokeColor = '#ffffff', strokeWidth = 2) {
+	if (height < radius * 2 || width < radius * 2) {return; }
 	ctx.beginPath();
 	ctx.strokeStyle = strokeColor;
 	ctx.lineWidth = strokeWidth;
-	ctx.fillStyle = fillColor;
 	ctx.moveTo(x + radius, y);
 	ctx.lineTo(x + width - radius, y);
 	ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
@@ -65,6 +87,13 @@ function roundRect(ctx, x, y, width, height, radius = 0, fill = true, fillColor 
 	ctx.lineTo(x, y + radius);
 	ctx.quadraticCurveTo(x, y, x + radius, y);
 	ctx.closePath();
-	if (fill) { ctx.fill(); }
+	if (fill) { 
+		ctx.fillStyle = fillColor;
+		ctx.fill(); 
+	}
 	if (stroke) { ctx.stroke(); }
+}
+
+function clamp(number, min, max) {
+	return Math.max(min, Math.min(number, max));
 }
