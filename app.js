@@ -1,4 +1,4 @@
-'use strict'
+'use strict';
 
 window.onload = init;
 window.onresize = resizeCanvas;
@@ -8,58 +8,84 @@ function init() {
 	window.requestAnimationFrame(draw);
 }
 
-function resizeCanvas() {
+// set the canvas sizes or match screenSize if value < 0
+function resizeCanvas(height = -1, width = -1) {
 	const canvas = document.getElementById('canvas');
-	canvas.setAttribute('height', document.body.clientHeight);
-	canvas.setAttribute('width', document.body.clientWidth);
+	canvas.setAttribute('height', height < 0 ? document.body.clientHeight : height);
+	canvas.setAttribute('width', width < 0 ? document.body.clientWidth : width);
 	canvas.style.backgroundColor = '#000000';
 }
 
-const noiseOffset = {
+
+// moves a noise layer to create a random but smooth movement
+function moveNoise(offset, vector) {
+	offset.x = offset.x + vector.x;
+	offset.y = offset.y + vector.y;
+	return offset;
+}
+
+function clamp(number, min, max) {
+	return Math.max(min, Math.min(number, max));
+}
+
+
+// constances for map generation
+const zoomScale = 10;
+const maxLength = 200;
+const width = 15;
+const gapSize = 30;
+
+
+// length noise => length map for rectangles
+const lengthNoise = new PerlinNoise();
+var lengthNoiseOffset = {
 	x: 0,
 	y: 0
 }
-var offsetVector = {
-	x: PerlinNoise.get(Math.random(), Math.random()),
-	y: PerlinNoise.get(Math.random(), Math.random())
+var lengthOffsetVector = {
+	x: lengthNoise.get(Math.random(), Math.random()),
+	y: lengthNoise.get(Math.random(), Math.random())
 }
 
+// rotation noise => rotation map for rectangles
+const rotationNoise = new PerlinNoise();
+var rotationNoiseOffset = {
+	x: 0,
+	y: 0
+}
+var rotationOffsetVector = {
+	x: lengthNoise.get(Math.random(), Math.random()),
+	y: lengthNoise.get(Math.random(), Math.random())
+}
+
+
+// draw canvas content
 function draw() {
 	const canvas = document.getElementById('canvas');
 	const ctx = canvas.getContext('2d');
 
-	const width = 10;
-
-	// ctx.globalCompositeOperation = 'destination-over';
-	ctx.clearRect(0, 0, canvas.getAttribute('width'), canvas.getAttribute('height')); // clear canvas
+	// clear canvas
+	ctx.clearRect(0, 0, canvas.getAttribute('width'), canvas.getAttribute('height'));
 
 	// loop through the positions in the 2D canvas
-	for (var x = 0; x < canvas.clientWidth / (width*1.5); x++) {
-		for (var y = 0; y < canvas.clientHeight / (width*1.5); y++) {
-			const height = width * clamp((10 * PerlinNoise.get((x + noiseOffset.x) / 50, (y + noiseOffset.y) / 50)), 0, 10);
-			roundRect(ctx, x * (width * 1.5), y * (width * 1.5), width, height, width / 2, true, '#323232', true, '#22aaff', 1);
+	for (var x = 0; x < canvas.clientWidth / (width + gapSize); x++) {
+		for (var y = 0; y < canvas.clientHeight / (width + gapSize); y++) {
+			const xMapPos = (x + lengthNoiseOffset.x) / zoomScale;
+			const yMapPos = (y + lengthNoiseOffset.y) / zoomScale;
+			const height = maxLength * clamp((lengthNoise.get(xMapPos, yMapPos)), 0, maxLength);
+			roundRect(ctx, x * (width + gapSize), y * (width + gapSize), width, height, width / 2, 
+						true, '#32323288', 
+						true, '#22aaff', 1);
 		}
 	}
 
-	moveNoise();
+	lengthNoiseOffset = moveNoise(lengthNoiseOffset, lengthOffsetVector);
 	window.requestAnimationFrame(draw);
 }
 
 
-function moveNoise() {
-	noiseOffset.x += offsetVector.x;
-	noiseOffset.y += offsetVector.y;
-	if (noiseOffset.x > 100 || noiseOffset.x < -100) {
-		offsetVector.x = - offsetVector.x + (Math.random() / 10);
-	}
-	if (noiseOffset.y > 100 || noiseOffset.y < -100) {
-		offsetVector.y = - offsetVector.y + (Math.random() / 10);
-	}
-}
 
-
-// draws a rounded rectangle into the canvas-context
-/**
+/** draws a rounded rectangle into the canvas-context
  * @param {CanvasRenderingContext2D} ctx 
  * @param {Number} x 
  * @param {Number} y 
@@ -72,7 +98,9 @@ function moveNoise() {
  * @param {String} strokeColor 
  * @param {Number} strokeWidth 
  */
-function roundRect(ctx, x, y, width, height, radius = 0, fill = true, fillColor = '#dededf', stroke = true, strokeColor = '#ffffff', strokeWidth = 2) {
+function roundRect(ctx, x, y, width, height, radius = 0, 
+					fill = true, fillColor = '#dededf', 
+					stroke = true, strokeColor = '#ffffff', strokeWidth = 2) {
 	if (height < radius * 2 || width < radius * 2) {return; }
 	ctx.beginPath();
 	ctx.strokeStyle = strokeColor;
@@ -92,8 +120,4 @@ function roundRect(ctx, x, y, width, height, radius = 0, fill = true, fillColor 
 		ctx.fill(); 
 	}
 	if (stroke) { ctx.stroke(); }
-}
-
-function clamp(number, min, max) {
-	return Math.max(min, Math.min(number, max));
 }
