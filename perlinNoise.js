@@ -2,8 +2,14 @@
 
 class PerlinNoise {
 
-	constructor() {
+	/** Initialise this PerlinNoise with an optional zoom-factor and optional offset-point
+	 * @param {Number} zoomScale 
+	 * @param {{x: Number, y: Number}} offset 
+	 */
+	constructor(zoomScale = 1, offset = {x: 0, y: 0}) {
 		this.gradients = {};
+		this.zoomScale = zoomScale;
+		this.offset = offset;
 	}
 
 	randomVector() {
@@ -34,11 +40,18 @@ class PerlinNoise {
 		return a + this.smootherstep(x) * (b - a);
 	}
 
+	/** generate a new seed
+	 */
 	seed() {
 		this.gradients = {};
 	}
 
-	get(x, y) {
+	/** returnes the noise value at this specific location
+	 * @param {Number} x 
+	 * @param {Number} y 
+	 * @returns interpolated value
+	 */
+	getAt(x, y) {
 		let xf = Math.floor(x);
 		let yf = Math.floor(y);
 		//interpolate
@@ -50,6 +63,33 @@ class PerlinNoise {
 		let xb = this.interpolate(x-xf, bl, br);
 		let v = this.interpolate(y-yf, xt, xb);
 		return v;
+	}
+
+	/** returnes the noise value at this location + the offset vector
+	 * @param {Number} x 
+	 * @param {Number} y 
+	 * @returns interpolated value
+	 */
+	get(x, y) {
+		return this.getAt((x + this.offset.x) / this.zoomScale, 
+						  (y + this.offset.y) / this.zoomScale);
+	}
+
+	/** moves the noise layer according to a vector
+	 * @param {{x: Number, y: Number}} vector
+	 */
+	move(vector) {
+		this.offset.x += vector.x;
+		this.offset.y += vector.y;
+	}
+
+	/** moves the noise layer to a specific position
+	 * @param {Number} x 
+	 * @param {Number} y 
+	 */
+	moveTo(x, y) {
+		this.offset.x = x;
+		this.offset.y = y;
 	}
 
 }
