@@ -11,18 +11,11 @@ function init() {
 // set the canvas sizes or match screenSize if value < 0
 function resizeCanvas(height = -1, width = -1) {
 	const canvas = document.getElementById('canvas');
-	canvas.setAttribute('height', height < 0 ? document.body.clientHeight : height);
-	canvas.setAttribute('width', width < 0 ? document.body.clientWidth : width);
+	canvas.setAttribute('height', height < 0 ? canvas.clientHeight : height);
+	canvas.setAttribute('width', width < 0 ? canvas.clientWidth : width);
 	canvas.style.backgroundColor = '#000000';
 }
 
-
-// moves a noise layer to create a random but smooth movement
-function moveNoise(offset, vector) {
-	offset.x = offset.x + vector.x;
-	offset.y = offset.y + vector.y;
-	return offset;
-}
 
 function clamp(number, min, max) {
 	return Math.max(min, Math.min(number, max));
@@ -30,65 +23,45 @@ function clamp(number, min, max) {
 
 
 // constances for map generation
-const zoomScale = 10;
-const maxLength = 200;
-const width = 15;
-const gapSize = 20;
+const zoomScale = 20;
+const maxLength = 300;
+const width = 10;
+const gapSize = 10;
 
 
 // length noise => length map for rectangles
-const lengthNoise = new PerlinNoise();
-var lengthNoiseOffset = {
-	x: 0,
-	y: 0
-}
+const lengthNoise = new PerlinNoise(zoomScale);
 var lengthOffsetVector = {
-	x: lengthNoise.get(Math.random(), Math.random()) / 4,
-	y: lengthNoise.get(Math.random(), Math.random()) / 4
+	x: lengthNoise.get(Math.random(), Math.random()),
+	y: lengthNoise.get(Math.random(), Math.random())
 }
 
 // rotation noise => rotation map for rectangles
-const rotationNoise = new PerlinNoise();
-var rotationNoiseOffset = {
-	x: 0,
-	y: 0
-}
+const rotationNoise = new PerlinNoise(zoomScale);
 var rotationOffsetVector = {
-	x: rotationNoise.get(Math.random(), Math.random()) / 2,
-	y: rotationNoise.get(Math.random(), Math.random()) / 2
+	x: rotationNoise.get(Math.random(), Math.random()),
+	y: rotationNoise.get(Math.random(), Math.random())
 }
 
 // red color noise => color map for red fill of rectangles
-const rColorNoise = new PerlinNoise();
-var rColorNoiseOffset = {
-	x: 0,
-	y: 0
-}
+const rColorNoise = new PerlinNoise(zoomScale);
 var rColorOffsetVector = {
-	x: rColorNoise.get(Math.random(), Math.random()) / 4,
-	y: rColorNoise.get(Math.random(), Math.random()) / 4
+	x: rColorNoise.get(Math.random(), Math.random()),
+	y: rColorNoise.get(Math.random(), Math.random())
 }
 
 // green color noise => color map for green fill of rectangles
-const gColorNoise = new PerlinNoise();
-var gColorNoiseOffset = {
-	x: 0,
-	y: 0
-}
+const gColorNoise = new PerlinNoise(zoomScale);
 var gColorOffsetVector = {
-	x: gColorNoise.get(Math.random(), Math.random()) / 4,
-	y: gColorNoise.get(Math.random(), Math.random()) / 4
+	x: gColorNoise.get(Math.random(), Math.random()),
+	y: gColorNoise.get(Math.random(), Math.random())
 }
 
 // blue color noise => color map for blue fill of rectangles
-const bColorNoise = new PerlinNoise();
-var bColorNoiseOffset = {
-	x: 0,
-	y: 0
-}
+const bColorNoise = new PerlinNoise(zoomScale);
 var bColorOffsetVector = {
-	x: bColorNoise.get(Math.random(), Math.random()) / 4,
-	y: bColorNoise.get(Math.random(), Math.random()) / 4
+	x: bColorNoise.get(Math.random(), Math.random()),
+	y: bColorNoise.get(Math.random(), Math.random())
 }
 
 
@@ -103,28 +76,12 @@ function draw() {
 	// loop through the positions in the 2D canvas
 	for (var x = 0; x < canvas.clientWidth / (width + gapSize); x++) {
 		for (var y = 0; y < canvas.clientHeight / (width + gapSize); y++) {
-			// length values
-			const xLenMapPos = (x + lengthNoiseOffset.x) / zoomScale;
-			const yLenMapPos = (y + lengthNoiseOffset.y) / zoomScale;
-			const height = maxLength * clamp((lengthNoise.get(xLenMapPos, yLenMapPos)), 0, maxLength);
 
-			// rotation values
-			const xRotMapPos = (x + rotationNoiseOffset.x) / zoomScale;
-			const yRotMapPos = (y + rotationNoiseOffset.y) / zoomScale;
-			const rotation = rotationNoise.get(xRotMapPos, yRotMapPos) * (720 / Math.PI);
-
-			// rColor values
-			const xRColMapPos = (x + rColorNoiseOffset.x) / (zoomScale / 2);
-			const yRColMapPos = (y + rColorNoiseOffset.y) / (zoomScale / 2);
-			const rColor = clamp((256 * rColorNoise.get(xRColMapPos, yRColMapPos)), 0, 256);
-			// gColor values
-			const xGColMapPos = (x + gColorNoiseOffset.x) / (zoomScale / 2);
-			const yGColMapPos = (y + gColorNoiseOffset.y) / (zoomScale / 2);
-			const gColor = clamp((256 * gColorNoise.get(xGColMapPos, yGColMapPos)), 0, 256);
-			// bColor values
-			const xBColMapPos = (x + bColorNoiseOffset.x) / (zoomScale / 2);
-			const yBColMapPos = (y + bColorNoiseOffset.y) / (zoomScale / 2);
-			const bColor = clamp((256 * bColorNoise.get(xBColMapPos, yBColMapPos)), 0, 256);
+			const height = maxLength * Math.abs(clamp(lengthNoise.get(x, y), -0.2, 1));
+			const rotation = rotationNoise.get(x, y) * (1440 / Math.PI);
+			const rColor = clamp((256 * 3 * rColorNoise.get(x, y)), 64, 512);
+			const gColor = clamp((256 * 3 * gColorNoise.get(x, y)), 64, 512);
+			const bColor = clamp((256 * 3 * bColorNoise.get(x, y)), 64, 512);
 
 			roundRect(ctx, x * (width + gapSize), y * (width + gapSize), width, height, width / 2, rotation,
 						true, `rgba(${rColor}, ${gColor} ,${bColor} , 0.5)`, 
@@ -132,12 +89,12 @@ function draw() {
 		}
 	}
 
-	lengthNoiseOffset = moveNoise(lengthNoiseOffset, lengthOffsetVector);
-	rotationNoiseOffset = moveNoise(rotationNoiseOffset, rotationOffsetVector);
+	lengthNoise.move(lengthOffsetVector);
+	rotationNoise.move(rotationOffsetVector);
 
-	rColorNoiseOffset = moveNoise(rColorNoiseOffset, rColorOffsetVector);
-	gColorNoiseOffset = moveNoise(gColorNoiseOffset, gColorOffsetVector);
-	bColorNoiseOffset = moveNoise(bColorNoiseOffset, bColorOffsetVector);
+	rColorNoise.move(rColorOffsetVector);
+	gColorNoise.move(gColorOffsetVector);
+	bColorNoise.move(bColorOffsetVector);
 
 	window.requestAnimationFrame(draw);
 }
@@ -160,7 +117,7 @@ function draw() {
 function roundRect(ctx, x, y, width, height, radius = 0, rotation = 0,
 					fill = true, fillColor = '#dededf', 
 					stroke = true, strokeColor = '#ffffff', strokeWidth = 2) {
-	if (height < radius * 2 || width < radius * 2) {return; }
+	if (height < radius * 2 || width < radius * 2) { return; }
 	ctx.save();
 	ctx.beginPath();
 	ctx.translate(x + width/2, y + height/2);
