@@ -21,6 +21,21 @@ function clamp(number, min, max) {
 	return Math.max(min, Math.min(number, max));
 }
 
+function getRandomInt(min, max) {
+	min = Math.ceil(min);
+	max = Math.floor(max);
+	return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function randomVector() {
+	const x = getRandomInt(2, 5) / 100;
+	const y = getRandomInt(2, 5) / 100;
+	return {
+		x: (Math.random() > 0.5 ? -1 : 1) * x,
+		y: (Math.random() > 0.5 ? -1 : 1) * y
+	}
+}
+
 
 // constances for map generation
 const zoomScale = 20;
@@ -31,38 +46,23 @@ const gapSize = 10;
 
 // length noise => length map for rectangles
 const lengthNoise = new PerlinNoise(zoomScale);
-var lengthOffsetVector = {
-	x: lengthNoise.get(Math.random(), Math.random()),
-	y: lengthNoise.get(Math.random(), Math.random())
-}
+var lengthOffsetVector = randomVector();
 
 // rotation noise => rotation map for rectangles
 const rotationNoise = new PerlinNoise(zoomScale);
-var rotationOffsetVector = {
-	x: rotationNoise.get(Math.random(), Math.random()),
-	y: rotationNoise.get(Math.random(), Math.random())
-}
+var rotationOffsetVector = randomVector();
 
 // red color noise => color map for red fill of rectangles
 const rColorNoise = new PerlinNoise(zoomScale);
-var rColorOffsetVector = {
-	x: rColorNoise.get(Math.random(), Math.random()),
-	y: rColorNoise.get(Math.random(), Math.random())
-}
+var rColorOffsetVector = randomVector();
 
 // green color noise => color map for green fill of rectangles
 const gColorNoise = new PerlinNoise(zoomScale);
-var gColorOffsetVector = {
-	x: gColorNoise.get(Math.random(), Math.random()),
-	y: gColorNoise.get(Math.random(), Math.random())
-}
+var gColorOffsetVector = randomVector();
 
 // blue color noise => color map for blue fill of rectangles
 const bColorNoise = new PerlinNoise(zoomScale);
-var bColorOffsetVector = {
-	x: bColorNoise.get(Math.random(), Math.random()),
-	y: bColorNoise.get(Math.random(), Math.random())
-}
+var bColorOffsetVector = randomVector();
 
 
 // draw canvas content
@@ -77,7 +77,7 @@ function draw() {
 	for (var x = 0; x < canvas.clientWidth / (width + gapSize); x++) {
 		for (var y = 0; y < canvas.clientHeight / (width + gapSize); y++) {
 
-			const height = maxLength * Math.abs(clamp(lengthNoise.get(x, y), -0.2, 1));
+			const height = maxLength * Math.abs(clamp(lengthNoise.get(x, y), 0, 1));
 			const rotation = rotationNoise.get(x, y) * (1440 / Math.PI);
 			const rColor = clamp((256 * 3 * rColorNoise.get(x, y)), 64, 512);
 			const gColor = clamp((256 * 3 * gColorNoise.get(x, y)), 64, 512);
