@@ -5,14 +5,18 @@ window.onresize = resizeCanvas;
 
 function init() {
 	resizeCanvas();
+	const canvas = document.getElementById('canvas');
+	canvas.addEventListener('resize', () => {
+		resizeCanvas();
+	})
 	window.requestAnimationFrame(draw);
 }
 
 // set the canvas sizes or match screenSize if value < 0
-function resizeCanvas(height = -1, width = -1) {
+function resizeCanvas() {
 	const canvas = document.getElementById('canvas');
-	canvas.setAttribute('height', height < 0 ? canvas.clientHeight : height);
-	canvas.setAttribute('width', width < 0 ? canvas.clientWidth : width);
+	canvas.setAttribute('height', canvas.clientHeight);
+	canvas.setAttribute('width', canvas.clientWidth);
 	canvas.style.backgroundColor = '#000000';
 }
 
@@ -31,8 +35,8 @@ function randomVector() {
 	const x = getRandomInt(2, 5) / 100;
 	const y = getRandomInt(2, 5) / 100;
 	return {
-		x: (Math.random() > 0.5 ? -1 : 1) * x,
-		y: (Math.random() > 0.5 ? -1 : 1) * y
+		x: (Math.random() > 0.5 ? -1 : 1) * x * (document.body.clientHeight / 1000),
+		y: (Math.random() > 0.5 ? -1 : 1) * y * (document.body.clientHeight / 1000)
 	}
 }
 
