@@ -1,4 +1,4 @@
-# Coral
+# Coral-Reef
 This is a weekend-project I did in a few hours total and I'm very happy how it turned out, to be honest. I am very surprised, how well it works and find it extremely mesmerizing to watch.
 
 
