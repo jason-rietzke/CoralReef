@@ -5,14 +5,14 @@ This is a weekend-project I did in a few hours total and I'm very happy how it t
 ## What It's For
 Since I find it very interesting to watch I'll properly use it as my background or screensaver.
 Originally I just wanted to play around. Over the hours it progressed, worked really well and I created something Coral-Reef ’isch.
-[watch live](https://jason-rietzke.github.io/coral/index.html)
+[watch live](https://jason-rietzke.github.io/CoralReef/index.html)
 
 ![](https://user-images.githubusercontent.com/28512517/114315255-6b72fa00-9afe-11eb-8bd5-192b7de1da83.mp4)
 
 ---
 
 By playing with some filter I found that a blur effect feels very smooth and mesmerizing as the paths move. For me it's more like a Lava-Lamp.
-[watch live](https://jason-rietzke.github.io/coral/blured.html)
+[watch live](https://jason-rietzke.github.io/CoralReef/blured.html)
 
 ![](https://user-images.githubusercontent.com/28512517/114315262-73cb3500-9afe-11eb-859f-ecd607a3e907.mp4)
 
@@ -36,5 +36,5 @@ The seamless movement of all the attributes is done by creating for every noise-
 ## What's Next
 Currently I implemented the basic features so it looks good, but I'll probably put some more work into it.
 I made two demo-version available on GitHub Pages - the "normal" (Coral-Reef) one and blurred (Lava-Lamp) one
-* [Coral-Reef](https://jason-rietzke.github.io/coral/index.html)
-* [Lava-Lamp](https://jason-rietzke.github.io/coral/blured.html)
+* [Coral-Reef](https://jason-rietzke.github.io/CoralReef/index.html)
+* [Lava-Lamp](https://jason-rietzke.github.io/CoralReef/blured.html)
