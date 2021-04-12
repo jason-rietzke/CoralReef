@@ -44,8 +44,8 @@ function randomVector() {
 // constances for map generation
 const zoomScale = 20;
 const maxLength = 300;
-const width = 10;
-const gapSize = 10;
+const width = (document.body.clientWidth / 300);
+const gapSize = (document.body.clientWidth / 200);
 
 
 // length noise => length map for rectangles
