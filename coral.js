@@ -42,10 +42,10 @@ function randomVector() {
 
 
 // constances for map generation
-const zoomScale = 20;
-const maxLength = 300;
-const width = (document.body.clientWidth / 300);
-const gapSize = (document.body.clientWidth / 200);
+const zoomScale = (document.body.clientHeight / 50);
+const fieldSize = (document.body.clientHeight / 20);
+const pointMaxLength = (document.body.clientHeight / 2);
+const recursivePoints = 1;
 
 
 // length noise => length map for rectangles
@@ -53,7 +53,7 @@ const lengthNoise = new PerlinNoise(zoomScale);
 var lengthOffsetVector = randomVector();
 
 // rotation noise => rotation map for rectangles
-const rotationNoise = new PerlinNoise(zoomScale);
+const rotationNoise = new PerlinNoise(zoomScale * 2);
 var rotationOffsetVector = randomVector();
 
 // red color noise => color map for red fill of rectangles
@@ -78,18 +78,22 @@ function draw() {
 	ctx.clearRect(0, 0, canvas.getAttribute('width'), canvas.getAttribute('height'));
 
 	// loop through the positions in the 2D canvas
-	for (var x = 0; x < canvas.clientWidth / (width + gapSize); x++) {
-		for (var y = 0; y < canvas.clientHeight / (width + gapSize); y++) {
+	for (var x = 0; x < canvas.clientWidth / fieldSize / recursivePoints; x++) {
+		for (var y = 0; y < canvas.clientHeight / fieldSize / recursivePoints; y++) {
 
-			const height = maxLength * clamp(lengthNoise.get(x, y), 0, 1);
-			const rotation = rotationNoise.get(x, y) * (1440 / Math.PI);
+			const height = pointMaxLength * clamp(lengthNoise.get(x, y), 0, 1);
+			const rotation = rotationNoise.get(x, y) * (360 * 3 / Math.PI);
 			const rColor = clamp((256 * 3 * rColorNoise.get(x, y)), 64, 512);
 			const gColor = clamp((256 * 3 * gColorNoise.get(x, y)), 64, 512);
 			const bColor = clamp((256 * 3 * bColorNoise.get(x, y)), 64, 512);
 
-			roundRect(ctx, x * (width + gapSize), y * (width + gapSize), width, height, width / 2, rotation,
-						true, `rgba(${rColor}, ${gColor} ,${bColor})`, 
-						false, '#22aaff', 1);
+			for (var ix = 0; ix < recursivePoints; ix++) {
+				for (var iy = 0; iy < recursivePoints; iy++) {
+					roundRect(ctx, ((x * recursivePoints) * fieldSize) + (ix * fieldSize), ((y * recursivePoints) * fieldSize) + (iy * fieldSize), (fieldSize / 2), height, fieldSize / (2 * 2), rotation,
+							true, `rgba(${rColor}, ${gColor} ,${bColor})`, 
+							false, '#22aaff', 1);
+				}
+			}
 		}
 	}
 
