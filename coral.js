@@ -42,7 +42,7 @@ function randomVector() {
 
 
 // constances for map generation
-const zoomScale = (document.body.clientHeight / 50);
+const zoomScale = (document.body.clientHeight / 100);
 const fieldSize = (document.body.clientHeight / 20);
 const pointMaxLength = (document.body.clientHeight / 2);
 const recursivePoints = 1;
