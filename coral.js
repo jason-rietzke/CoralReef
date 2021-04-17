@@ -1,6 +1,6 @@
 'use strict';
 
-window.onload = init;
+init();
 window.onresize = resizeCanvas;
 
 function init() {
@@ -81,14 +81,14 @@ function draw() {
 	for (var x = 0; x < canvas.clientWidth / (width + gapSize); x++) {
 		for (var y = 0; y < canvas.clientHeight / (width + gapSize); y++) {
 
-			const height = maxLength * Math.abs(clamp(lengthNoise.get(x, y), 0, 1));
+			const height = maxLength * clamp(lengthNoise.get(x, y), 0, 1);
 			const rotation = rotationNoise.get(x, y) * (1440 / Math.PI);
 			const rColor = clamp((256 * 3 * rColorNoise.get(x, y)), 64, 512);
 			const gColor = clamp((256 * 3 * gColorNoise.get(x, y)), 64, 512);
 			const bColor = clamp((256 * 3 * bColorNoise.get(x, y)), 64, 512);
 
 			roundRect(ctx, x * (width + gapSize), y * (width + gapSize), width, height, width / 2, rotation,
-						true, `rgba(${rColor}, ${gColor} ,${bColor} , 0.5)`, 
+						true, `rgba(${rColor}, ${gColor} ,${bColor})`, 
 						false, '#22aaff', 1);
 		}
 	}
@@ -139,8 +139,12 @@ function roundRect(ctx, x, y, width, height, radius = 0, rotation = 0,
 	ctx.quadraticCurveTo(0, 0, radius, 0);
 	ctx.closePath();
 	if (fill) { 
-		ctx.fillStyle = fillColor;
-		ctx.fill(); 
+		// gradient
+		var g = ctx.createLinearGradient(0, 0, 1, height);
+		g.addColorStop(0, '#00000000');
+		g.addColorStop(1, fillColor);
+		ctx.fillStyle = g;
+		ctx.fill();
 	}
 	if (stroke) { ctx.stroke(); }
 	ctx.restore();
