@@ -19,13 +19,23 @@ function init() {
 	window.requestAnimationFrame(draw);
 
 	const measurementTime = 5 * 1000;
-	setTimeout(() => {
-		console.group('STATS');
-		console.log(DRAW_COUNTER + ' draws in ' + measurementTime / 1000 +' sec with ' + STROKE_COUNTER + ' rendered strokes');
-		console.log('avg. calc-time: \t\t' + ((CALC_TIME / FRAME_TIME) * 100).toFixed(4) + '%');
-		console.log('avg. render-time: \t' + ((RENDER_TIME / FRAME_TIME) * 100).toFixed(4) + '%');
-		console.log('avg. move-time: \t' + ((MOVE_TIME / FRAME_TIME) * 100).toFixed(4) + '%');
-		console.groupEnd();
+	setInterval(() => {
+		console.clear();
+		setTimeout(() => {
+			console.group('STATS');
+			console.log(DRAW_COUNTER + ' draws in ' + measurementTime / 1000 +' sec with ' + STROKE_COUNTER + ' rendered strokes');
+			console.log('avg. calc-time: \t\t' + ((CALC_TIME / FRAME_TIME) * 100).toFixed(4) + '%');
+			console.log('avg. render-time: \t' + ((RENDER_TIME / FRAME_TIME) * 100).toFixed(4) + '%');
+			console.log('avg. move-time: \t' + ((MOVE_TIME / FRAME_TIME) * 100).toFixed(4) + '%');
+			console.groupEnd();
+	
+			DRAW_COUNTER = 0;
+			STROKE_COUNTER = 0;
+			FRAME_TIME = 0;
+			CALC_TIME = 0;
+			RENDER_TIME = 0;
+			MOVE_TIME = 0;
+		}, 10);
 	}, measurementTime);
 }
 
