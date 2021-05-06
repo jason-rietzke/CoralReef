@@ -1,5 +1,12 @@
 'use strict';
 
+var DRAW_COUNTER = 0;
+var STROKE_COUNTER = 0;
+var FRAME_TIME = 0;
+var CALC_TIME = 0;
+var RENDER_TIME = 0;
+var MOVE_TIME = 0;
+
 init();
 window.onresize = resizeCanvas;
 
@@ -10,6 +17,16 @@ function init() {
 		resizeCanvas();
 	})
 	window.requestAnimationFrame(draw);
+
+	const measurementTime = 5 * 1000;
+	setTimeout(() => {
+		console.group('STATS');
+		console.log(DRAW_COUNTER + ' draws in ' + measurementTime / 1000 +' sec with ' + STROKE_COUNTER + ' rendered strokes');
+		console.log('avg. calc-time: \t\t' + ((CALC_TIME / FRAME_TIME) * 100).toFixed(4) + '%');
+		console.log('avg. render-time: \t' + ((RENDER_TIME / FRAME_TIME) * 100).toFixed(4) + '%');
+		console.log('avg. move-time: \t' + ((MOVE_TIME / FRAME_TIME) * 100).toFixed(4) + '%');
+		console.groupEnd();
+	}, measurementTime);
 }
 
 // set the canvas sizes or match screenSize if value < 0
@@ -71,6 +88,7 @@ var bColorOffsetVector = randomVector();
 
 // draw canvas content
 function draw() {
+	const frameTime = Date.now();
 	const canvas = document.getElementById('canvas');
 	const ctx = canvas.getContext('2d');
 
@@ -78,31 +96,43 @@ function draw() {
 	ctx.clearRect(0, 0, canvas.getAttribute('width'), canvas.getAttribute('height'));
 
 	// loop through the positions in the 2D canvas
+	let strokeCounter = 0;
 	for (var x = 0; x < canvas.clientWidth / fieldSize / recursivePoints; x++) {
 		for (var y = 0; y < canvas.clientHeight / fieldSize / recursivePoints; y++) {
 
+			const calcTime = Date.now();
 			const height = pointMaxLength * clamp(lengthNoise.get(x, y), 0, 1);
 			const rotation = rotationNoise.get(x, y) * (360 * 3 / Math.PI);
 			const rColor = clamp((256 * 3 * rColorNoise.get(x, y)), 64, 512);
 			const gColor = clamp((256 * 3 * gColorNoise.get(x, y)), 64, 512);
 			const bColor = clamp((256 * 3 * bColorNoise.get(x, y)), 64, 512);
+			CALC_TIME += Date.now() - calcTime;
 
+			const renderTime = Date.now();
 			for (var ix = 0; ix < recursivePoints; ix++) {
 				for (var iy = 0; iy < recursivePoints; iy++) {
+					strokeCounter += 1;
 					roundRect(ctx, ((x * recursivePoints) * fieldSize) + (ix * fieldSize), ((y * recursivePoints) * fieldSize) + (iy * fieldSize), (fieldSize / 2), height, fieldSize / (2 * 2), rotation,
 							true, `rgba(${rColor}, ${gColor} ,${bColor})`, 
 							false, '#22aaff', 1);
 				}
 			}
+			RENDER_TIME += Date.now() - renderTime;
 		}
 	}
+	STROKE_COUNTER = strokeCounter;
 
+	const moveTime = Date.now();
 	lengthNoise.move(lengthOffsetVector);
 	rotationNoise.move(rotationOffsetVector);
 
 	rColorNoise.move(rColorOffsetVector);
 	gColorNoise.move(gColorOffsetVector);
 	bColorNoise.move(bColorOffsetVector);
+	MOVE_TIME += Date.now() - moveTime;
+
+	FRAME_TIME += Date.now() - frameTime;
+	DRAW_COUNTER ++;
 
 	window.requestAnimationFrame(draw);
 }
